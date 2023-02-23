@@ -1,1 +1,3 @@
-add_subdirectory(vtkItkDisplay)
+#add_subdirectory(vtkItkDisplay)
+add_subdirectory(vtkRectilinearGridDisplay)
+add_subdirectory(vtkTransformExplanation)
