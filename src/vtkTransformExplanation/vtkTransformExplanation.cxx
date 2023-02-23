@@ -174,7 +174,28 @@ void DisplayArrow(vtkSmartPointer<vtkRenderer>& renderer)
 	objTransform->Update();
 	printActorTransform(objectActor);
 
-
+	////////////////////pre multiply concatenate///////////////////////
+	objTransform->Identity();
+	objTransform->PreMultiply();
+	vtkNew<vtkTransform> rotationByZWith30Degree;
+	double rotateMatrix[16] = { 0.866, -0.5, 0, 0,
+											0.5, 0.866, 0, 0,
+											0, 0, 1, 0,
+											0, 0, 0, 1 };
+	rotationByZWith30Degree->SetMatrix(rotateMatrix);
+	rotationByZWith30Degree->Update();
+	objTransform->Concatenate(rotationByZWith30Degree); // E * R
+	objTransform->Update();
+	vtkNew<vtkTransform> translationByXWith1Unit;
+	double translateMatrix[16] = { 1, 0, 0, 1,
+												0, 1, 0, 0,
+												0, 0, 1, 0,
+												0, 0, 0, 1};
+	translationByXWith1Unit->SetMatrix(translateMatrix);
+	translationByXWith1Unit->Update();
+	objTransform->Concatenate(translationByXWith1Unit); // (E * R) * T
+	objTransform->Update();
+	printActorTransform(objectActor);
 
 
 	renderer->AddActor(sphereActor);
