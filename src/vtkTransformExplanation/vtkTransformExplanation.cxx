@@ -15,11 +15,19 @@
 #include <vtkTextActor.h>
 #include <vtkSphereSource.h>
 #include <vtkTransform.h>
+#include "Vector3d.h"
+#include "TransformAssistant.h"
 
 void DisplayArrow(vtkSmartPointer<vtkRenderer>& renderer);
 void  printActorTransform(vtkSmartPointer<vtkActor>& actor);
+void TransformationTest();
+void CoordinateTransform();
 int main(int, char*[])
 {
+	CoordinateTransform();
+	return 1;
+	TransformationTest();
+
 	vtkNew<vtkNamedColors> colors;
 
 	//std::string filePath = "D:\\DataRepo\\mesh\\s0.stl";
@@ -189,11 +197,28 @@ void DisplayArrow(vtkSmartPointer<vtkRenderer>& renderer)
 	vtkNew<vtkTransform> translationByXWith1Unit;
 	double translateMatrix[16] = { 1, 0, 0, 1,
 												0, 1, 0, 0,
-												0, 0, 1, 0,
+												0, 0, 1, 0, 
 												0, 0, 0, 1};
 	translationByXWith1Unit->SetMatrix(translateMatrix);
 	translationByXWith1Unit->Update();
 	objTransform->Concatenate(translationByXWith1Unit); // (E * R) * T
+	objTransform->Update();
+	printActorTransform(objectActor);
+
+	///////////////////////first translate and then rotate (premulitply)////////////////////////////////
+	objTransform->Identity();
+	objTransform->PreMultiply();
+	objTransform->Translate(1, 0, 0);
+	objTransform->RotateZ(30);
+	objTransform->Update();
+	printActorTransform(objectActor);
+
+	////////////////////////////////////////////
+	objTransform->Identity();
+	objTransform->PostMultiply();
+	objTransform->Translate(1, 0, 0);
+	objTransform->Translate(0,1,0);
+	objTransform->RotateZ(30);
 	objTransform->Update();
 	printActorTransform(objectActor);
 
@@ -209,4 +234,90 @@ void  printActorTransform(vtkSmartPointer<vtkActor>& actor)
 {
 	vtkMatrix4x4* curMatrix = actor->GetUserMatrix();
 	curMatrix->Print(std::cout); //print current matrix
+}
+
+
+void TransformationTest()
+{
+	CVector3d pos(1,1,0);
+	CVector3d localXAxis(1,1,0);
+	CVector3d localYAxis(-1, 1, 0);
+	vSP<vtkTransform> worldToLocal = CreateWorldToLocalTrans(pos, localXAxis, localYAxis);
+
+	CVector3d worldPoint1(0,0,1);
+	CVector3d localPoint1 = worldToLocal->TransformPoint(worldPoint1.point);
+	int a = 1;
+}
+
+void CoordinateTransform()
+{
+	CVector3d x(1, 1, 0);
+	CVector3d y(-1, 1, 0);
+	CVector3d z(0, 0, 1);
+	CVector3d ori(1, 1, 0);
+	vSP<vtkTransform> tempaaa = CreateLocalToWorldTrans(x.point, y.point, z.point, ori.point);
+	vSP<vtkTransform> tempaaa1 = CreateLocalToWorldTransform(ori.point, x.point, y.point);
+
+
+	CVector3d xEnd(-1, 1, 0);
+	CVector3d yEnd(1, 1, 1);
+	CVector3d oriEnd(2, 1, 1);
+	vSP<vtkTransform> pose1 = CreatePoseTransfrom(ori, x, y, oriEnd, xEnd, yEnd);
+	vSP<vtkTransform> pose2 = CreatePostureTransform(ori, x, y, oriEnd, xEnd, yEnd);
+	pose1->Print(std::cout);
+	pose2->Print(std::cout);
+
+
+	vtkSmartPointer<vtkAxesActor> worldAxesActor =
+		vtkSmartPointer<vtkAxesActor>::New();
+	worldAxesActor->SetPosition(0, 0, 0);
+	worldAxesActor->SetTotalLength(3, 3, 3); ///////
+	worldAxesActor->SetShaftType(0);
+	worldAxesActor->SetAxisLabels(0);
+	worldAxesActor->SetCylinderRadius(0.02);
+
+	vtkSmartPointer<vtkAxesActor> localAxesActor =
+		vtkSmartPointer<vtkAxesActor>::New();
+	//localAxesActor->SetPosition(0, 0, 0);
+	vtkNew<vtkTransform> localAxisTransform;
+	localAxisTransform->Translate(1, 1, 0);
+	localAxisTransform->Update();
+	localAxisTransform->Print(std::cout);
+
+	localAxisTransform->RotateZ(45);
+	localAxisTransform->Update();
+	localAxisTransform->Print(std::cout);
+	localAxesActor->SetUserTransform(localAxisTransform);
+
+	vtkNew<vtkTransform> tmp;
+	tmp->DeepCopy(localAxisTransform);
+	tmp->Inverse();
+	tmp->Update();
+	tmp->Print(std::cout);
+
+
+
+	localAxesActor->SetTotalLength(1, 1, 1); ///////
+	localAxesActor->SetShaftType(0);
+	localAxesActor->SetAxisLabels(0);
+	localAxesActor->SetCylinderRadius(0.02);
+
+
+	vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+	vtkNew<vtkRenderWindow> renderWindow;
+	renderWindow->AddRenderer(renderer);
+	renderWindow->SetWindowName("ReadSTL");
+
+	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+	renderWindowInteractor->SetRenderWindow(renderWindow);
+
+	//DisplayArrow(renderer);
+	renderer->AddActor(worldAxesActor);
+	renderer->AddActor(localAxesActor);
+	vtkNew<vtkNamedColors> colors;
+	renderer->SetBackground(colors->GetColor3d("DarkOliveGreen").GetData());
+
+	renderWindow->Render();
+	renderWindowInteractor->Start();
+
 }

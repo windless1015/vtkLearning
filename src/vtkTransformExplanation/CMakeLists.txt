@@ -11,7 +11,12 @@ endif()
 
 # Prevent a "command line is too long" failure in Windows.
 set(CMAKE_NINJA_FORCE_RESPONSE_FILE "ON" CACHE BOOL "Force Ninja to use response files.")
-add_executable(vtkTransformExplanation MACOSX_BUNDLE vtkTransformExplanation.cxx )
+add_executable(vtkTransformExplanation MACOSX_BUNDLE
+ Vector3d.h
+ Vector3d.cpp
+ TransformAssistant.h
+ TransformAssistant.cpp
+ vtkTransformExplanation.cxx )
   target_link_libraries(vtkTransformExplanation PRIVATE ${VTK_LIBRARIES}
 )
 # vtk_module_autoinit is needed
