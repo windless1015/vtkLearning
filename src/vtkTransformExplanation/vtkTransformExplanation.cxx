@@ -17,11 +17,14 @@
 #include <vtkTransform.h>
 #include "Vector3d.h"
 #include "TransformAssistant.h"
+#include "DisplayComponents.h"
 
 void DisplayArrow(vtkSmartPointer<vtkRenderer>& renderer);
 void  printActorTransform(vtkSmartPointer<vtkActor>& actor);
 void TransformationTest();
 void CoordinateTransform();
+void ChatGPTVTKTransform();
+void CreateAxesArrow(vtkTransform* trans, vtkSmartPointer<vtkRenderer>& renderer);
 int main(int, char*[])
 {
 	CoordinateTransform();
@@ -56,6 +59,7 @@ int main(int, char*[])
 	renderWindowInteractor->SetRenderWindow(renderWindow);
 
 	DisplayArrow(renderer);
+	DisplayAGivenVecoter(renderer, CVector3d(1, 0, 0).point, CVector3d(1, 0, 0).point,0.5, 1);
 	//renderer->AddActor(actor);
 	renderer->SetBackground(colors->GetColor3d("DarkOliveGreen").GetData());
 
@@ -251,6 +255,8 @@ void TransformationTest()
 
 void CoordinateTransform()
 {
+	vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+
 	CVector3d x(1, 1, 0);
 	CVector3d y(-1, 1, 0);
 	CVector3d z(0, 0, 1);
@@ -259,51 +265,68 @@ void CoordinateTransform()
 	vSP<vtkTransform> tempaaa1 = CreateLocalToWorldTransform(ori.point, x.point, y.point);
 
 
-	CVector3d xEnd(-1, 1, 0);
-	CVector3d yEnd(1, 1, 1);
-	CVector3d oriEnd(2, 1, 1);
+	CVector3d xEnd(1.732, 1, 0);
+	CVector3d yEnd(-1, 1.732,0);
+	CVector3d oriEnd(1.732/2.0f, 0.5, 0);
 	vSP<vtkTransform> pose1 = CreatePoseTransfrom(ori, x, y, oriEnd, xEnd, yEnd);
 	vSP<vtkTransform> pose2 = CreatePostureTransform(ori, x, y, oriEnd, xEnd, yEnd);
 	pose1->Print(std::cout);
+	CVector3d aaa;
+	CVector3d oooo(0, 0, 0);
+	
+	double* point1 = pose1->TransformPoint(oooo.point);
+	double b[3] = { point1[0], point1[1], point1[2] };
+
+	double* point2 = pose2->TransformPoint(oooo.point);
+	double c[3] = { point2[0], point2[1], point2[2] };
 	pose2->Print(std::cout);
 
 
-	vtkSmartPointer<vtkAxesActor> worldAxesActor =
-		vtkSmartPointer<vtkAxesActor>::New();
-	worldAxesActor->SetPosition(0, 0, 0);
-	worldAxesActor->SetTotalLength(3, 3, 3); ///////
-	worldAxesActor->SetShaftType(0);
-	worldAxesActor->SetAxisLabels(0);
-	worldAxesActor->SetCylinderRadius(0.02);
+	vSP<vtkTransform> worldAxesTrans = vSP<vtkTransform>::New();
+	CreateAxesArrow(worldAxesTrans, renderer);
 
-	vtkSmartPointer<vtkAxesActor> localAxesActor =
-		vtkSmartPointer<vtkAxesActor>::New();
-	//localAxesActor->SetPosition(0, 0, 0);
-	vtkNew<vtkTransform> localAxisTransform;
-	localAxisTransform->Translate(1, 1, 0);
-	localAxisTransform->Update();
-	localAxisTransform->Print(std::cout);
 
-	localAxisTransform->RotateZ(45);
-	localAxisTransform->Update();
-	localAxisTransform->Print(std::cout);
-	localAxesActor->SetUserTransform(localAxisTransform);
+	/*vSP<vtkTransform> local1AxesTrans = vSP<vtkTransform>::New();
+	double localAMatrix[16] = 
+	{
+		fromXDir[0], fromYDir[0], fromZDir[0], fromPos.point[0],
+		fromXDir[1], fromYDir[1], fromZDir[1],  fromPos.point[1],
+		fromXDir[2],fromYDir[2], fromZDir[2], fromPos.point[2],
+			0 ,        0,         0,      1
+	};
+	local1AxesTrans->SetMatrix(localAMatrix);
+	CreateAxesArrow(local1AxesTrans, renderer);*/
 
-	vtkNew<vtkTransform> tmp;
+
+
+	//vtkSmartPointer<vtkAxesActor> localAxesActor =
+	//	vtkSmartPointer<vtkAxesActor>::New();
+	////localAxesActor->SetPosition(0, 0, 0);
+	//vtkNew<vtkTransform> localAxisTransform;
+	//localAxisTransform->Translate(1, 1, 0);
+	//localAxisTransform->Update();
+	//localAxisTransform->Print(std::cout);
+
+	//localAxisTransform->RotateZ(45);
+	//localAxisTransform->Update();
+	//localAxisTransform->Print(std::cout);
+	//localAxesActor->SetUserTransform(localAxisTransform);
+
+	/*vtkNew<vtkTransform> tmp;
 	tmp->DeepCopy(localAxisTransform);
 	tmp->Inverse();
 	tmp->Update();
-	tmp->Print(std::cout);
+	tmp->Print(std::cout);*/
 
 
 
-	localAxesActor->SetTotalLength(1, 1, 1); ///////
-	localAxesActor->SetShaftType(0);
-	localAxesActor->SetAxisLabels(0);
-	localAxesActor->SetCylinderRadius(0.02);
+	//localAxesActor->SetTotalLength(1, 1, 1); ///////
+	//localAxesActor->SetShaftType(0);
+	//localAxesActor->SetAxisLabels(0);
+	//localAxesActor->SetCylinderRadius(0.02);
 
 
-	vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+
 	vtkNew<vtkRenderWindow> renderWindow;
 	renderWindow->AddRenderer(renderer);
 	renderWindow->SetWindowName("ReadSTL");
@@ -312,12 +335,58 @@ void CoordinateTransform()
 	renderWindowInteractor->SetRenderWindow(renderWindow);
 
 	//DisplayArrow(renderer);
-	renderer->AddActor(worldAxesActor);
-	renderer->AddActor(localAxesActor);
+	//renderer->AddActor(worldAxesActor);
+	//renderer->AddActor(localAxesActor);
 	vtkNew<vtkNamedColors> colors;
 	renderer->SetBackground(colors->GetColor3d("DarkOliveGreen").GetData());
 
 	renderWindow->Render();
 	renderWindowInteractor->Start();
 
+}
+
+void ChatGPTVTKTransform()
+{
+	// Create a transform to represent the local coordinate system
+	vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
+	localTransform->Translate(1.0, 2.0, 3.0);
+	localTransform->RotateX(30.0);
+	localTransform->RotateY(45.0);
+	localTransform->RotateZ(60.0);
+
+	// Create a transform to represent the world coordinate system
+	vtkSmartPointer<vtkTransform> worldTransform = vtkSmartPointer<vtkTransform>::New();
+	worldTransform->Translate(10.0, 20.0, 30.0);
+	worldTransform->RotateX(45.0);
+	worldTransform->RotateY(60.0);
+	worldTransform->RotateZ(90.0);
+
+	// Compute the transform from world coordinates to local coordinates
+	vtkSmartPointer<vtkTransform> localToWorldTransform = vtkSmartPointer<vtkTransform>::New();
+	vtkSmartPointer<vtkMatrix4x4> localToWorldMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+	vtkMatrix4x4::Invert(worldTransform->GetMatrix(), localToWorldMatrix);
+	localToWorldTransform->SetMatrix(localToWorldMatrix);
+	localToWorldTransform->Concatenate(localTransform);
+
+	// Print the resulting transform
+	double* elements = localToWorldTransform->GetMatrix()->Element[0];
+	for (int i = 0; i < 16; i++)
+	{
+		std::cout << elements[i] << " ";
+		if ((i + 1) % 4 == 0)
+			std::cout << std::endl;
+	}
+}
+
+void CreateAxesArrow(vtkTransform* trans, vtkSmartPointer<vtkRenderer>& renderer)
+{
+	vtkSmartPointer<vtkAxesActor> axesActor =
+		vtkSmartPointer<vtkAxesActor>::New();
+	axesActor->SetTotalLength(3, 3, 3); ///////
+	axesActor->SetShaftType(0);
+	axesActor->SetAxisLabels(true);
+	axesActor->SetCylinderRadius(0.02);
+	axesActor->SetUserTransform(trans);
+
+	renderer->AddActor(axesActor);
 }

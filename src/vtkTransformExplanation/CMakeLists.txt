@@ -16,6 +16,8 @@ add_executable(vtkTransformExplanation MACOSX_BUNDLE
  Vector3d.cpp
  TransformAssistant.h
  TransformAssistant.cpp
+ DisplayComponents.h
+ DisplayComponents.cpp
  vtkTransformExplanation.cxx )
   target_link_libraries(vtkTransformExplanation PRIVATE ${VTK_LIBRARIES}
 )

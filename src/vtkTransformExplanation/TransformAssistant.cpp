@@ -4,6 +4,8 @@
 
 vtkSmartPointer<vtkTransform>  CreateToLocalTrans(CVector3d Pos, CVector3d XDir, CVector3d YDir)
 {
+	XDir.Unit();
+	YDir.Unit();
 	vtkSmartPointer<vtkTransform> ResultTrans = vtkSmartPointer<vtkTransform>::New();
 
 
@@ -73,7 +75,11 @@ vtkSmartPointer<vtkTransform> CreatePoseTransfrom(CVector3d fromPos, CVector3d f
 	toYDir.Unit();
 
 	vSP<vtkTransform> fromToLocal = CreateToLocalTrans(fromPos, fromXDir, fromYDir);
+	//fromToLocal->Print(std::cout);
+
 	vSP<vtkTransform> fromToWord = CreateToLocalTrans(fromPos, fromXDir, fromYDir);
+	//fromToWord->Print(std::cout);
+
 	fromToWord->Inverse();
 	fromToWord->Update();
 
@@ -120,7 +126,7 @@ vtkSmartPointer<vtkTransform> CreateLocalToWorldTrans(double xDir[3], double yDi
 	vSP<vtkTransform> localToWorldTrans = vSP<vtkTransform>::New();
 	localToWorldTrans->SetMatrix(A);
 	localToWorldTrans->Update();
-
+	localToWorldTrans->Print(std::cout);
 	return localToWorldTrans;
 
 }
