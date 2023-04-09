@@ -7,7 +7,6 @@
 #include "vtkCommand.h"
 #include "vtkRandomGraphSource.h"
 #include "vtkGraph.h"
-
 #include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
@@ -15,49 +14,30 @@
 #include "vtkContextView.h"
 #include "vtkContextScene.h"
 #include "vtkObjectFactory.h"
+#include"vtkContextActor.h"
+#include "vtkNamedColors.h"
+#include "vtkFollower.h"
+
 #include "vtkipritem.h"
 
-class GraphAnimate : public vtkCommand
-{
-public:
-    static GraphAnimate* New() { return new GraphAnimate(); }
-    vtkTypeMacro(GraphAnimate, vtkCommand);
-    void Execute(vtkObject* caller, unsigned long eventId, void* callData) override
-    {
-        Q_UNUSED(caller);
-        Q_UNUSED(eventId);
-        Q_UNUSED(callData);
-        this->GraphItem->UpdatePositions();
-        this->view->Render();
-        this->view->GetRenderWindow()->GetInteractor()->CreateOneShotTimer(10);
-    }
-    vtkGraphItem* GraphItem;
-    vtkContextView* view;
-};
-
-
-
-
-namespace Ui {
-    class GraphItem;
-}
-
-class GraphItem : public QWidget
+class IPRItem : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit GraphItem(QWidget* parent = nullptr);
-    ~GraphItem();
+    explicit IPRItem(QWidget* parent = nullptr);
+    ~IPRItem();
 
     void startinteractor();
 
 private:
-    Ui::GraphItem* ui;
-    vtkSmartPointer<vtkGraphItem> item;
+    QVTKOpenGLNativeWidget* openGLWidget;
+    vtkSmartPointer<vtkIPRItem> item;
+
+    vtkSmartPointer<MyDrawing> sampleItem;
+
     vtkSmartPointer<vtkRandomGraphSource> source;
     vtkSmartPointer<vtkContextView> mview;
-    vtkSmartPointer<GraphAnimate> anim;
 };
 
 #endif // GRAPHITEM_H

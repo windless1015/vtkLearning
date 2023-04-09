@@ -1,11 +1,14 @@
 #include "ipritem.h"
-#include "ui_graphitem.h"
 
-GraphItem::GraphItem(QWidget* parent) :
-    QWidget(parent),
-    ui(new Ui::GraphItem)
+vtkStandardNewMacro(MyDrawing);
+
+IPRItem::IPRItem(QWidget* parent) :
+    QWidget(parent)
 {
-    ui->setupUi(this);
+    vtkNew<vtkNamedColors> colors;
+
+    openGLWidget = new QVTKOpenGLNativeWidget(this);
+    openGLWidget->resize(800, 500);
 
     mview = vtkSmartPointer<vtkContextView>::New();
     mview->GetRenderer()->SetBackground(0.0, 1.0, 1.0);
@@ -16,29 +19,34 @@ GraphItem::GraphItem(QWidget* parent) :
     source->SetNumberOfEdges(0);
     source->StartWithTreeOn();
     source->Update();
-    item = vtkSmartPointer<vtkGraphItem>::New();
+    item = vtkSmartPointer<vtkIPRItem>::New();
     item->SetGraph(source->GetOutput());
     mview->GetScene()->AddItem(item);
 
-    anim = vtkSmartPointer<GraphAnimate>::New();
-
-    anim->view = mview;
-    anim->GraphItem = item;
-    mview->SetRenderWindow(ui->openGLWidget->renderWindow());
-    mview->GetRenderWindow()->GetInteractor()->Initialize();
-    mview->GetRenderWindow()->GetInteractor()->CreateOneShotTimer(10);
-    mview->GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, anim);
+    sampleItem = vtkSmartPointer<MyDrawing>::New();
 
 
+    vtkNew<vtkContextActor> cactor;
+    cactor->GetScene()->AddItem(sampleItem);
+
+    vtkNew<vtkRenderer> renderer;
+    renderer->AddActor(cactor);
+    renderer->SetBackground(colors->GetColor3d("WhiteSmoke").GetData());
+
+    openGLWidget->renderWindow()->AddRenderer(renderer);
+    openGLWidget->renderWindow()->Render();
+
+    /*mview->SetRenderWindow(openGLWidget->renderWindow());
+    mview->GetRenderWindow()->GetInteractor()->Initialize();*/
 
 }
 
-GraphItem::~GraphItem()
+IPRItem::~IPRItem()
 {
-    delete ui;
+
 }
 
-void GraphItem::startinteractor()
+void IPRItem::startinteractor()
 {
-    //    view->GetRenderWindow()->GetInteractor()->Start();
+    //view->GetRenderWindow()->GetInteractor()->Start();
 }

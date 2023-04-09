@@ -1,9 +1,9 @@
 #include "vtkipritem.h"
 
-vtkCxxSetObjectMacro(vtkGraphItem, Graph, vtkGraph);
-vtkStandardNewMacro(vtkGraphItem);
+vtkCxxSetObjectMacro(vtkIPRItem, Graph, vtkGraph);
+vtkStandardNewMacro(vtkIPRItem);
 
-class vtkGraphItem::Implementation
+class vtkIPRItem::Implementation
 {
 public:
     Implementation()
@@ -63,14 +63,14 @@ public:
     }
 
     vtkSmartPointer<vtkMinimalStandardRandomSequence> Random;
-    vtkGraphItem* Item;
+    vtkIPRItem* Item;
 
     std::vector<std::pair<float, float> > Position;
     std::vector<std::pair<float, float> > Velocity;
 };
 
 //-----------------------------------------------------------------------------
-vtkGraphItem::vtkGraphItem()
+vtkIPRItem::vtkIPRItem()
 {
     this->Impl = new Implementation();
     this->Impl->Item = this;
@@ -81,14 +81,14 @@ vtkGraphItem::vtkGraphItem()
 }
 
 //-----------------------------------------------------------------------------
-vtkGraphItem::~vtkGraphItem()
+vtkIPRItem::~vtkIPRItem()
 {
     delete this->Impl;
     this->SetGraph(nullptr);
 }
 
 //-----------------------------------------------------------------------------
-bool vtkGraphItem::Paint(vtkContext2D* painter)
+bool vtkIPRItem::Paint(vtkContext2D* painter)
 {
     painter->GetTextProp()->SetVerticalJustificationToCentered();
     painter->GetTextProp()->SetJustificationToCentered();
@@ -126,7 +126,7 @@ bool vtkGraphItem::Paint(vtkContext2D* painter)
 }
 
 //-----------------------------------------------------------------------------
-bool vtkGraphItem::Hit(const vtkContextMouseEvent& mouse)
+bool vtkIPRItem::Hit(const vtkContextMouseEvent& mouse)
 {
     float pos[2] = { 0.0f, 0.0f };
     for (vtkIdType i = this->Graph->GetNumberOfVertices() - 1; i >= 0; --i)
@@ -145,14 +145,14 @@ bool vtkGraphItem::Hit(const vtkContextMouseEvent& mouse)
 }
 
 //-----------------------------------------------------------------------------
-bool vtkGraphItem::MouseEnterEvent(const vtkContextMouseEvent&)
+bool vtkIPRItem::MouseEnterEvent(const vtkContextMouseEvent&)
 {
     this->MouseOver = true;
     return true;
 }
 
 //-----------------------------------------------------------------------------
-bool vtkGraphItem::MouseMoveEvent(const vtkContextMouseEvent& mouse)
+bool vtkIPRItem::MouseMoveEvent(const vtkContextMouseEvent& mouse)
 {
     int deltaX = static_cast<int>(mouse.GetPos()[0] - this->LastPosition[0]);
     int deltaY = static_cast<int>(mouse.GetPos()[1] - this->LastPosition[1]);
@@ -191,14 +191,14 @@ bool vtkGraphItem::MouseMoveEvent(const vtkContextMouseEvent& mouse)
 }
 
 //-----------------------------------------------------------------------------
-bool vtkGraphItem::MouseLeaveEvent(const vtkContextMouseEvent&)
+bool vtkIPRItem::MouseLeaveEvent(const vtkContextMouseEvent&)
 {
     this->MouseOver = false;
     return true;
 }
 
 //-----------------------------------------------------------------------------
-bool vtkGraphItem::MouseButtonPressEvent(const vtkContextMouseEvent& mouse)
+bool vtkIPRItem::MouseButtonPressEvent(const vtkContextMouseEvent& mouse)
 {
     this->MouseButtonPressed = mouse.GetButton();
     this->LastPosition[0] = mouse.GetPos()[0];
@@ -207,14 +207,14 @@ bool vtkGraphItem::MouseButtonPressEvent(const vtkContextMouseEvent& mouse)
 }
 
 //-----------------------------------------------------------------------------
-bool vtkGraphItem::MouseButtonReleaseEvent(const vtkContextMouseEvent&)
+bool vtkIPRItem::MouseButtonReleaseEvent(const vtkContextMouseEvent&)
 {
     this->MouseButtonPressed = -1;
     return true;
 }
 
 //-----------------------------------------------------------------------------
-void vtkGraphItem::UpdatePositions()
+void vtkIPRItem::UpdatePositions()
 {
     vtkIdType numVerts = this->Graph->GetNumberOfVertices();
     float restDistance = 40.0f;
@@ -303,7 +303,7 @@ void vtkGraphItem::UpdatePositions()
 }
 
 //-----------------------------------------------------------------------------
-void vtkGraphItem::PrintSelf(ostream& os, vtkIndent indent)
+void vtkIPRItem::PrintSelf(ostream& os, vtkIndent indent)
 {
     this->Superclass::PrintSelf(os, indent);
 }
