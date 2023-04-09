@@ -1,13 +1,14 @@
 #include <QApplication>
 #include <qwidget.h>
-#include "graphitem.h"
+#include "ipritem.h"
 
 VTK_MODULE_INIT(vtkRenderingContextOpenGL2);
 
 int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
-    GraphItem mGraphItem;
-    mGraphItem.show();
+    QWidget w;
+    GraphItem* mGraphItem = new GraphItem(&w);
+    w.show();
     return a.exec();
 }
