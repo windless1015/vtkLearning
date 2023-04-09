@@ -1,3 +1,6 @@
 #add_subdirectory(vtkItkDisplay)
 add_subdirectory(vtkRectilinearGridDisplay)
 add_subdirectory(vtkTransformExplanation)
+add_subdirectory(computeMatingSurfacePoints)
+add_subdirectory(vtkBillboardTextActor3D)
+add_subdirectory(GraphItem)
