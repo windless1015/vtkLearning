@@ -3,6 +3,45 @@
 vtkCxxSetObjectMacro(vtkIPRItem, Graph, vtkGraph);
 vtkStandardNewMacro(vtkIPRItem);
 
+
+
+bool MyDrawing::Paint(vtkContext2D* painter)
+{
+    painter->GetTextProp()->SetVerticalJustificationToCentered();
+    painter->GetTextProp()->SetJustificationToCentered();
+    painter->GetTextProp()->SetFontSize(20); //设置方框内字体的大小
+    painter->GetPen()->SetColor(0, 0, 255);//边缘是蓝色
+
+    if (false) //选中
+    {
+        painter->GetTextProp()->SetColor(1.0f, 1.0f, 1.0f); //白色字体
+        painter->GetBrush()->SetColor(0, 0, 255); //蓝色背景
+    }
+    else  //未选中
+    {
+        painter->GetTextProp()->SetColor(0.0f, 0.0f, 0.0f); //黑色字体
+        painter->GetBrush()->SetColor(255, 255, 255); //白色背景
+    }
+
+    painter->DrawRect(20, 20, iprSquareEdge, iprSquareEdge);
+    painter->DrawString(iprSquareEdge - 2, iprSquareEdge - 2, vtkVariant(0.2).ToString());
+    return true;
+}
+
+bool MyDrawing::MouseButtonPressEvent(const vtkContextMouseEvent& mouse)
+{
+    this->MouseButtonPressed = mouse.GetButton();
+    this->LastPosition[0] = mouse.GetPos()[0];
+    this->LastPosition[1] = mouse.GetPos()[1];
+    return true;
+}
+
+
+
+
+
+
+
 class vtkIPRItem::Implementation
 {
 public:
