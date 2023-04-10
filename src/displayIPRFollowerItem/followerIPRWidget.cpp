@@ -19,6 +19,7 @@
 #include <vtkCaptionRepresentation.h>
 #include <vtkCaptionWidget.h>
 #include <vtkCamera.h>
+#include <vtkProperty2D.h>
 
 FollowerIPRWidget::FollowerIPRWidget(QWidget* parent) :
     QWidget(parent)
@@ -39,15 +40,33 @@ FollowerIPRWidget::FollowerIPRWidget(QWidget* parent) :
     caption2D->GetCaptionTextProperty()->SetFontSize(10);
     caption2D->SetPosition(100, 0);
     //caption2D->SetPosition2(200, 20);
-    caption2D->GetCaptionTextProperty()->FrameOn();
-    caption2D->GetCaptionTextProperty()->SetFrameWidth(1);
+
+    caption2D->GetProperty()->SetColor(0, 0, 1); //vtkCaptionActor2D 源代码中,3d指示线的颜色是根据其自身设置的
+    caption2D->GetProperty()->SetLineWidth(1);
+
+    caption2D->GetCaptionTextProperty()->FrameOn(); // 打开 text frame
+    caption2D->GetCaptionTextProperty()->SetFrameWidth(1);// 边框的宽度为1个像素
+
+    if (false) //如果这个数字被选中
+    {
+        caption2D->GetCaptionTextProperty()->SetColor(1.0f, 1.0f, 1.0f); //ipr字体白色
+        caption2D->GetCaptionTextProperty()->SetBackgroundColor(0., 0., 1.0f); //背景为蓝色
+        caption2D->GetCaptionTextProperty()->SetBackgroundOpacity(0.9);
+    }
+    else
+    {
+        caption2D->GetCaptionTextProperty()->SetColor(0, 0, 0); //ipr字体黑色
+    }
+
     caption2D->GetCaptionTextProperty()->SetFrameColor(0., 0., 1.0f);
-    caption2D->GetCaptionTextProperty()->SetBackgroundOpacity(0.4);
-    caption2D->GetCaptionTextProperty()->SetBackgroundColor(0., 0., 0.7);
+
+    caption2D->GetCaptionTextProperty()->SetFontFamily(2);//2号字体比较合适
+    caption2D->GetCaptionTextProperty()->ShadowOff(); //关闭数字阴影,否则会出现重影
     caption2D->SetPadding(0);
-    caption2D->SetThreeDimensionalLeader(true);
-    caption2D->LeaderOn();
-    caption2D->SetAttachmentPoint(30.0, 0.0, 2.0);
+    caption2D->SetThreeDimensionalLeader(true); //指示线为三维,否则有时候会被遮挡
+    caption2D->LeaderOn(); //指示线开
+
+    caption2D->SetAttachmentPoint(30.0, 0.0, 2.0); // caption2d 所在的
 
     renderer->AddActor(caption2D);
 
