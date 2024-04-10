@@ -65,10 +65,13 @@ FollowerIPRWidget::FollowerIPRWidget(QWidget* parent) :
     caption2D->SetPadding(0);
     caption2D->SetThreeDimensionalLeader(true); //指示线为三维,否则有时候会被遮挡
     caption2D->LeaderOn(); //指示线开
-
+    caption2D->SetPickable(true);
     caption2D->SetAttachmentPoint(30.0, 0.0, 2.0); // caption2d 所在的
-
+   
     renderer->AddActor(caption2D);
+
+    vtkSmartPointer<MyPickCallback> pickCallback = vtkSmartPointer<MyPickCallback>::New();
+    renderer->AddObserver(vtkCommand::PickEvent, pickCallback);
 
 }
 

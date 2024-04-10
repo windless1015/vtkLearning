@@ -5,7 +5,7 @@
 
 #include "vtkAutoInit.h"
 #include "vtkContextItem.h"
-
+#include <vtkCommand.h>
 #include "vtkMinimalStandardRandomSequence.h"
 #include "vtkVariant.h"
 #include "vtkContext2D.h"
@@ -20,6 +20,33 @@
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
 VTK_MODULE_INIT(vtkInteractionStyle);
 VTK_MODULE_INIT(vtkRenderingContextOpenGL2);
+
+
+
+class MyPickCallback : public vtkCommand
+{
+public:
+    static MyPickCallback* New()
+    {
+        return new MyPickCallback;
+    }
+
+    virtual void Execute(vtkObject* caller, unsigned long eventId, void* vtkNotUsed(callData))
+    {
+    	if (eventId == vtkCommand::PickEvent)
+    	{
+    		/*vtkRenderer* renderer = vtkRenderer::SafeDownCast(caller);
+    		if (renderer)
+    		{
+    			std::cout << "Actor picked!" << std::endl;
+    		}*/
+    	}
+    }
+};
+
+
+
+
 
 class vtkContext2D;
 class vtkActor;

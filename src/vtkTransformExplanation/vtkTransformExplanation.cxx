@@ -390,3 +390,73 @@ void CreateAxesArrow(vtkTransform* trans, vtkSmartPointer<vtkRenderer>& renderer
 
 	renderer->AddActor(axesActor);
 }
+
+vSP<vtkTransform> CreateTransformFromAToB(CVector3d A_xdir, CVector3d A_ydir, CVector3d posA, CVector3d B_xdir, CVector3d B_ydir, CVector3d posB)
+{
+	A_xdir.UnitVector();
+	A_ydir.UnitVector();
+
+	CVector3d A_zDir = A_xdir.CrossVector(A_ydir);
+	A_zDir.UnitVector();
+
+	// we need to re-compute the y direction
+	CVector3d orthogonalYDirection  = A_zDir.CrossVector(A_xdir);
+	orthogonalYDirection.UnitVector();
+	double matA[4][4] = {
+		{A_xdir[0], orthogonalYDirection[0], A_zDir[0], posA[0]}, // First row
+		{A_xdir[1], orthogonalYDirection[1], A_zDir[1], posA[1]}, // Second row
+		{A_xdir[2], orthogonalYDirection[2], A_zDir[2], posA[2]}, // Third row
+		{0, 0, 0, 1} 
+	};
+	vSP<vtkMatrix4x4> rotationMatrix4x4A = vSP<vtkMatrix4x4>::New();
+	for (int i = 0; i < 4; ++i)
+	{
+		for (int j = 0; j < 4; ++j)
+		{
+			rotationMatrix4x4A->SetElement(i, j, matA[i][j]);
+		}
+	}
+	vSP<vtkTransform> transformA = vSP<vtkTransform>::New();
+	transformA->SetMatrix(rotationMatrix4x4A);
+
+	vSP<vtkTransform> transformAInvert = vSP<vtkTransform>::New();
+	transformAInvert->DeepCopy(transformA);
+	transformAInvert->Inverse();
+	transformAInvert->Update();
+
+	B_xdir.UnitVector();
+	B_ydir.UnitVector();
+
+	CVector3d B_zDir = B_xdir.CrossVector(B_ydir);
+	B_zDir.UnitVector();
+
+	// we need to re-compute the y direction
+	CVector3d orthogonalY_BDirection = B_zDir.CrossVector(B_xdir);
+	orthogonalY_BDirection.UnitVector();
+	double matB[4][4] = {
+		{B_xdir[0], orthogonalY_BDirection[0], B_zDir[0], posB[0]}, // First row
+		{B_xdir[1], orthogonalY_BDirection[1], B_zDir[1], posB[1]}, // Second row
+		{B_xdir[2], orthogonalY_BDirection[2], B_zDir[2], posB[2]}, // Third row
+		{0, 0, 0, 1}
+	};
+	vSP<vtkMatrix4x4> rotationMatrix4x4B = vSP<vtkMatrix4x4>::New();
+	for (int i = 0; i < 4; ++i)
+	{
+		for (int j = 0; j < 4; ++j)
+		{
+			rotationMatrix4x4B->SetElement(i, j, matB[i][j]);
+		}
+	}
+	vSP<vtkTransform> transformB = vSP<vtkTransform>::New();
+	transformB->SetMatrix(rotationMatrix4x4B);
+
+
+
+	vSP<vtkTransform> transformResult = vSP<vtkTransform>::New();
+	transformResult->PostMultiply();
+	transformResult->DeepCopy(transformAInvert);
+	transformResult->Concatenate(transformB);
+	transformResult->Update();
+
+	return transformResult;
+}
